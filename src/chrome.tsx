@@ -265,21 +265,25 @@ export function CartDrawer() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-[80] bg-espresso/55 backdrop-blur-sm"
+          className="fixed inset-0 z-[80] bg-espresso/45 backdrop-blur-[2px]"
           onClick={() => setOpen(false)}
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
         >
           <motion.aside
             initial={{ x: "102%" }}
             animate={{ x: 0 }}
             exit={{ x: "102%" }}
             transition={{ type: "spring", stiffness: 290, damping: 32 }}
-            className="absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-mozza shadow-2xl"
+            className="absolute inset-y-3 right-3 flex h-[calc(100%-1.5rem)] w-[calc(100%-1.5rem)] max-w-md flex-col overflow-hidden rounded-[30px] border border-charcoal/10 bg-[#f8f1dd] shadow-[0_30px_80px_-20px_rgb(23_16_9/0.6)]"
             onClick={(e) => e.stopPropagation()}
+            onWheel={(e) => e.stopPropagation()}
+            onTouchMove={(e) => e.stopPropagation()}
             role="dialog"
             aria-label="Your order"
           >
-            <div className="flex items-center justify-between border-b border-charcoal/10 px-6 py-5">
-              <h3 className="font-display text-2xl font-black text-charcoal">Your Order</h3>
+            <div className="sticky top-0 z-20 flex items-center justify-between border-b border-charcoal/10 bg-[#f8f1dd]/95 px-5 py-4 backdrop-blur-sm">
+              <h3 className="font-display text-[2rem] font-black leading-none text-charcoal">Your Order</h3>
               <button
                 onClick={() => setOpen(false)}
                 aria-label="Close cart"
@@ -289,154 +293,158 @@ export function CartDrawer() {
               </button>
             </div>
 
-            {lines.length === 0 ? (
-              <div className="flex flex-1 flex-col items-center justify-center gap-4 px-8 text-center">
-                <span className="grid h-20 w-20 place-items-center rounded-full bg-cream-2">
-                  <ShoppingBag size={30} className="text-charcoal/40" />
-                </span>
-                <p className="font-display text-xl font-bold text-charcoal">Your plate is empty</p>
-                <p className="text-sm text-charcoal/55">Add something hot &amp; cheesy from the menu.</p>
-                <CTAButton
-                  onClick={() => {
-                    setOpen(false);
-                    setTimeout(() => scrollToId("menu"), 250);
-                  }}
-                >
-                  Browse Menu
-                </CTAButton>
-              </div>
-            ) : (
-              <>
-                <ul className="flex-1 space-y-3 overflow-y-auto px-5 py-5">
-                  <AnimatePresence initial={false}>
-                    {lines.map((l) => (
-                      <motion.li
-                        key={l.key}
-                        layout
-                        initial={{ opacity: 0, y: 14 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, x: 40 }}
-                        className="flex items-center gap-3 rounded-2xl border border-charcoal/8 bg-cream p-3"
-                      >
-                        {l.img ? (
-                          <img src={l.img} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" loading="lazy" />
-                        ) : (
-                          <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-gold/20 font-display text-lg font-black text-gold-deep">
-                            {l.name[0]}
-                          </span>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-bold text-charcoal">
-                            {l.name} {l.size && <span className="text-tomato">({l.size})</span>}
-                          </p>
-                          <p className="text-xs font-semibold text-gold-deep">{rs(l.unitPrice)} each</p>
-                          <div className="mt-1.5 flex items-center gap-2">
-                            <button onClick={() => dec(l.key)} aria-label={`Decrease ${l.name}`} className="grid h-6 w-6 place-items-center rounded-full border border-charcoal/15 text-charcoal transition-colors hover:border-tomato hover:text-tomato">
-                              <Minus size={12} />
-                            </button>
-                            <span className="w-5 text-center text-sm font-extrabold">{l.qty}</span>
-                            <button onClick={() => inc(l.key)} aria-label={`Increase ${l.name}`} className="grid h-6 w-6 place-items-center rounded-full border border-charcoal/15 text-charcoal transition-colors hover:border-tomato hover:text-tomato">
-                              <Plus size={12} />
-                            </button>
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-2">
-                          <span className="text-sm font-extrabold text-charcoal">{rs(l.unitPrice * l.qty)}</span>
-                          <button onClick={() => remove(l.key)} aria-label={`Remove ${l.name}`} className="text-charcoal/35 transition-colors hover:text-tomato">
-                            <Trash2 size={15} />
-                          </button>
-                        </div>
-                      </motion.li>
-                    ))}
-                  </AnimatePresence>
-                </ul>
-
-                <div className="space-y-4 border-t border-charcoal/10 px-6 py-5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-bold uppercase tracking-widest text-charcoal/55">Subtotal</span>
-                    <span className="font-display text-2xl font-black text-tomato">{rs(total)}</span>
-                  </div>
-                  <p className="text-xs leading-relaxed text-charcoal/55">
-                    {BUSINESS.services.join(" & ")} available — pay at the counter or on pickup.
-                  </p>
-
-                  <form onSubmit={placeOrder} className="grid gap-2.5">
-                    <div className="grid grid-cols-2 gap-2.5">
-                      <input
-                        required
-                        minLength={2}
-                        value={customer.name}
-                        onChange={(e) => setCustomer((value) => ({ ...value, name: e.target.value }))}
-                        placeholder="Your name"
-                        aria-label="Your name"
-                        className="min-w-0 rounded-xl border border-charcoal/15 bg-cream px-3.5 py-3 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-tomato"
-                      />
-                      <input
-                        required
-                        type="tel"
-                        value={customer.phone}
-                        onChange={(e) => setCustomer((value) => ({ ...value, phone: e.target.value }))}
-                        placeholder="Phone number"
-                        aria-label="Phone number"
-                        className="min-w-0 rounded-xl border border-charcoal/15 bg-cream px-3.5 py-3 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-tomato"
-                      />
-                    </div>
-                    <input
-                      value={customer.address}
-                      onChange={(e) => setCustomer((value) => ({ ...value, address: e.target.value }))}
-                      placeholder="Delivery address (optional)"
-                      aria-label="Delivery address"
-                      className="rounded-xl border border-charcoal/15 bg-cream px-3.5 py-3 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-tomato"
-                    />
-                    <button
-                      disabled={submitting}
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-tomato px-5 py-3.5 text-[0.72rem] font-extrabold uppercase tracking-[0.14em] text-espresso transition-colors hover:bg-tomato-deep hover:text-mozza disabled:cursor-wait disabled:opacity-60"
-                    >
-                      <ShoppingBag size={15} /> {submitting ? "Sending..." : "Place Order Online"}
-                    </button>
-                  </form>
-
-                  {orderStatus && (
-                    <p role="status" className={cn("rounded-xl px-3.5 py-2.5 text-xs font-semibold", orderStatus.type === "ok" ? "bg-basil/15 text-basil-deep" : "bg-cream-3 text-charcoal") }>
-                      {orderStatus.text}
-                    </p>
-                  )}
-
-                  {waLink && (
-                    <CTAButton href={waLink} className="w-full !bg-[#1faa53] !shadow-[0_12px_30px_-10px_rgb(31_170_83/0.6)]">
-                      Order on WhatsApp <ArrowRight size={16} />
-                    </CTAButton>
-                  )}
-                  {telLink && (
-                    <CTAButton href={telLink} variant="dark" className="w-full">
-                      <Phone size={15} /> Call to Order
-                    </CTAButton>
-                  )}
-                  <div className="grid grid-cols-2 gap-2.5">
-                    <button
-                      onClick={copyOrder}
-                      className={cn(
-                        "inline-flex items-center justify-center gap-2 rounded-full border px-4 py-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] transition-all",
-                        copied ? "border-basil bg-basil text-mozza" : "border-charcoal/20 text-charcoal hover:border-gold-deep hover:text-gold-deep"
-                      )}
-                    >
-                      <Copy size={14} /> {copied ? "Copied!" : "Copy Order"}
-                    </button>
-                    <a
-                      href={BUSINESS.links.directions}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center justify-center gap-2 rounded-full border border-charcoal/20 px-4 py-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] text-charcoal transition-all hover:border-tomato hover:text-tomato"
-                    >
-                      <MapPin size={14} /> Directions
-                    </a>
-                  </div>
-                  <button onClick={clear} className="w-full text-center text-xs font-semibold text-charcoal/40 transition-colors hover:text-tomato">
-                    Clear order
-                  </button>
+            <div className="flex-1 overflow-y-auto">
+              {lines.length === 0 ? (
+                <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-8 text-center">
+                  <span className="grid h-20 w-20 place-items-center rounded-full bg-cream-2">
+                    <ShoppingBag size={30} className="text-charcoal/40" />
+                  </span>
+                  <p className="font-display text-xl font-bold text-charcoal">Your plate is empty</p>
+                  <p className="text-sm text-charcoal/55">Add something hot &amp; cheesy from the menu.</p>
+                  <CTAButton
+                    onClick={() => {
+                      setOpen(false);
+                      setTimeout(() => scrollToId("menu"), 250);
+                    }}
+                  >
+                    Browse Menu
+                  </CTAButton>
                 </div>
-              </>
-            )}
+              ) : (
+                <>
+                  <div className="px-4 py-3">
+                    <ul className="space-y-3">
+                      <AnimatePresence initial={false}>
+                        {lines.map((l) => (
+                          <motion.li
+                            key={l.key}
+                            layout
+                            initial={{ opacity: 0, y: 14 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, x: 40 }}
+                            className="flex items-center gap-3 rounded-[22px] border border-charcoal/8 bg-[#f5ebcb] p-3 shadow-[0_8px_18px_-14px_rgba(23,16,9,0.4)]"
+                          >
+                            {l.img ? (
+                              <img src={l.img} alt="" className="h-14 w-14 shrink-0 rounded-xl object-cover" loading="lazy" />
+                            ) : (
+                              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-xl bg-gold/20 font-display text-lg font-black text-gold-deep">
+                                {l.name[0]}
+                              </span>
+                            )}
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-bold text-charcoal">
+                                {l.name} {l.size && <span className="text-tomato">({l.size})</span>}
+                              </p>
+                              <p className="text-xs font-semibold text-gold-deep">{rs(l.unitPrice)} each</p>
+                              <div className="mt-1.5 flex items-center gap-2">
+                                <button onClick={() => dec(l.key)} aria-label={`Decrease ${l.name}`} className="grid h-6 w-6 place-items-center rounded-full border border-charcoal/15 text-charcoal transition-colors hover:border-tomato hover:text-tomato">
+                                  <Minus size={12} />
+                                </button>
+                                <span className="w-5 text-center text-sm font-extrabold">{l.qty}</span>
+                                <button onClick={() => inc(l.key)} aria-label={`Increase ${l.name}`} className="grid h-6 w-6 place-items-center rounded-full border border-charcoal/15 text-charcoal transition-colors hover:border-tomato hover:text-tomato">
+                                  <Plus size={12} />
+                                </button>
+                              </div>
+                            </div>
+                            <div className="flex flex-col items-end gap-2">
+                              <span className="text-sm font-extrabold text-charcoal">{rs(l.unitPrice * l.qty)}</span>
+                              <button onClick={() => remove(l.key)} aria-label={`Remove ${l.name}`} className="text-charcoal/35 transition-colors hover:text-tomato">
+                                <Trash2 size={15} />
+                              </button>
+                            </div>
+                          </motion.li>
+                        ))}
+                      </AnimatePresence>
+                    </ul>
+                  </div>
+
+                  <div className="space-y-4 border-t border-charcoal/10 bg-[#f8f1dd]/95 px-5 pb-5 pt-4 backdrop-blur-sm">
+                    <div className="flex items-center justify-between pt-1">
+                      <span className="text-sm font-bold uppercase tracking-[0.18em] text-charcoal/55">Subtotal</span>
+                      <span className="font-display text-[2rem] font-black leading-none text-tomato">{rs(total)}</span>
+                    </div>
+                    <p className="text-xs leading-relaxed text-charcoal/55">
+                      {BUSINESS.services.join(" & ")} available — pay at the counter or on pickup.
+                    </p>
+
+                    <form onSubmit={placeOrder} className="grid gap-2.5">
+                      <div className="grid grid-cols-2 gap-2.5">
+                        <input
+                          required
+                          minLength={2}
+                          value={customer.name}
+                          onChange={(e) => setCustomer((value) => ({ ...value, name: e.target.value }))}
+                          placeholder="Your name"
+                          aria-label="Your name"
+                          className="min-w-0 rounded-2xl border border-charcoal/15 bg-[#efe2ad] px-3.5 py-3 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-tomato"
+                        />
+                        <input
+                          required
+                          type="tel"
+                          value={customer.phone}
+                          onChange={(e) => setCustomer((value) => ({ ...value, phone: e.target.value }))}
+                          placeholder="Phone number"
+                          aria-label="Phone number"
+                          className="min-w-0 rounded-2xl border border-charcoal/15 bg-[#efe2ad] px-3.5 py-3 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-tomato"
+                        />
+                      </div>
+                      <input
+                        value={customer.address}
+                        onChange={(e) => setCustomer((value) => ({ ...value, address: e.target.value }))}
+                        placeholder="Delivery address (optional)"
+                        aria-label="Delivery address"
+                        className="rounded-2xl border border-charcoal/15 bg-[#efe2ad] px-3.5 py-3 text-sm text-charcoal outline-none placeholder:text-charcoal/40 focus:border-tomato"
+                      />
+                      <button
+                        disabled={submitting}
+                        className="inline-flex w-full items-center justify-center gap-2 rounded-full bg-tomato px-5 py-3.5 text-[0.72rem] font-extrabold uppercase tracking-[0.14em] text-espresso shadow-[0_14px_28px_-12px_rgba(116,198,95,0.72)] transition-colors hover:bg-tomato-deep hover:text-mozza disabled:cursor-wait disabled:opacity-60"
+                      >
+                        <ShoppingBag size={15} /> {submitting ? "Sending..." : "Place Order Online"}
+                      </button>
+                    </form>
+
+                    {orderStatus && (
+                      <p role="status" className={cn("rounded-xl px-3.5 py-2.5 text-xs font-semibold", orderStatus.type === "ok" ? "bg-basil/15 text-basil-deep" : "bg-cream-3 text-charcoal") }>
+                        {orderStatus.text}
+                      </p>
+                    )}
+
+                    {waLink && (
+                      <CTAButton href={waLink} className="w-full !bg-[#1faa53] !shadow-[0_12px_30px_-10px_rgb(31_170_83/0.6)]">
+                        Order on WhatsApp <ArrowRight size={16} />
+                      </CTAButton>
+                    )}
+                    {telLink && (
+                      <CTAButton href={telLink} variant="dark" className="w-full">
+                        <Phone size={15} /> Call to Order
+                      </CTAButton>
+                    )}
+                    <div className="grid grid-cols-2 gap-2.5">
+                      <button
+                        onClick={copyOrder}
+                        className={cn(
+                          "inline-flex items-center justify-center gap-2 rounded-full border px-4 py-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] transition-all",
+                          copied ? "border-basil bg-basil text-mozza" : "border-charcoal/20 bg-[#f6efdf] text-charcoal hover:border-gold-deep hover:text-gold-deep"
+                        )}
+                      >
+                        <Copy size={14} /> {copied ? "Copied!" : "Copy Order"}
+                      </button>
+                      <a
+                        href={BUSINESS.links.directions}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-full border border-charcoal/20 px-4 py-3 text-[0.72rem] font-extrabold uppercase tracking-[0.12em] text-charcoal transition-all hover:border-tomato hover:text-tomato"
+                      >
+                        <MapPin size={14} /> Directions
+                      </a>
+                    </div>
+                    <button onClick={clear} className="w-full text-center text-xs font-semibold text-charcoal/40 transition-colors hover:text-tomato">
+                      Clear order
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
           </motion.aside>
         </motion.div>
       )}

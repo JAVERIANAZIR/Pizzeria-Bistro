@@ -266,7 +266,12 @@ export const lockScroll = (lock: boolean) => {
   const l = (window as unknown as { __lenis?: { stop: () => void; start: () => void } }).__lenis;
   if (lock) l?.stop();
   else l?.start();
+
+  const root = document.documentElement;
+  root.style.overflow = lock ? "hidden" : "";
+  root.style.height = lock ? "100%" : "";
   document.body.style.overflow = lock ? "hidden" : "";
+  document.body.style.height = lock ? "100%" : "";
 };
 
 /* ── Smooth scroll helper ────────────────────────────────────────── */

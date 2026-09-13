@@ -84,7 +84,7 @@ export function Hero() {
             </span>
             <span className="block overflow-hidden pb-2">
               <motion.span {...lineUp(0.71)} className="block text-[11.5vw] leading-[0.98] sm:text-6xl lg:text-7xl">
-                <em className="font-display italic text-transparent [background:linear-gradient(100deg,#fbf0c9,#a6dc86_45%,#74c65f)] [-webkit-background-clip:text] [background-clip:text]">
+                <em className="hero-gradient-text font-display italic">
                   Delicious.
                 </em>
               </motion.span>
